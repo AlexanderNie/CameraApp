@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,6 +32,7 @@ public class CameraActivity extends AppCompatActivity {
     private String TAG = CameraActivity.class.toString();
     private Camera mCamera;
     private CameraPreview mPreview;
+
 
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
@@ -145,6 +147,8 @@ public class CameraActivity extends AppCompatActivity {
                     public void onClick(View v) {
                         // get an image from the camera
                         mCamera.takePicture(null, null, mPicture);
+                        //Toast.makeText(CameraActivity.this, "abc", Toast.LENGTH_LONG).show();
+                        mCamera.startPreview();
                     }
                 }
         );
@@ -168,9 +172,21 @@ public class CameraActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         releaseCamera();              // release the camera immediately on pause event
+        //findViewById(R.id.camera_preview).setVisibility(View.GONE);
+        mPreview.setVisibility(View.GONE);
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mPreview.setVisibility(View.VISIBLE);
+        setupCamera();
+        //findViewById(R.id.camera_preview).setVisibility(View.VISIBLE);
     }
 
     private  void releaseCamera(){
+        mPreview.getHolder().removeCallback(mPreview);
         if (mCamera != null){
             mCamera.release();        // release the camera for other applications
             mCamera = null;
