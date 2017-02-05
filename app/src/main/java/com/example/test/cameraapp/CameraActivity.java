@@ -3,11 +3,14 @@ package com.example.test.cameraapp;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -21,19 +24,26 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
+import org.apache.http.NameValuePair;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class CameraActivity extends AppCompatActivity {
+    ProgressDialog pDialog;
+
     private String TAG = CameraActivity.class.toString();
     private Camera mCamera;
     private CameraPreview mPreview;
 
-
+    JSONParser jsonParser = new JSONParser();
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
 
@@ -42,6 +52,8 @@ public class CameraActivity extends AppCompatActivity {
 
     public static final String REQUEST_CAMERA= "App needs to access the Camera.";
     public static final String REQUEST_STORAGE= "App needs to access the Storage.";
+
+    private static final String REGISTER_URL = "http://10.0.2.2/silverproductivity/register2.php";
 
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
@@ -56,6 +68,7 @@ public class CameraActivity extends AppCompatActivity {
 
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
+                new Uploader().execute();
                 fos.write(data);
                 fos.close();
             } catch (FileNotFoundException e) {
@@ -261,6 +274,38 @@ public class CameraActivity extends AppCompatActivity {
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
                 return;
             }
+        }
+    }
+
+    public class Uploader extends AsyncTask<Void, Void, String> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog = new ProgressDialog(CameraActivity.this);
+            pDialog.setMessage("Loading Workload...");
+            pDialog.setIndeterminate(false);
+            pDialog.setCancelable(true);
+            pDialog.show();
+        }
+
+        @Override
+        //protected Bitmap doInBackground(Void... arg0) {
+        protected String doInBackground(Void... param) {
+
+            //we will develop this method in version 2
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            JSONObject json = jsonParser.makeHttpRequest(REGISTER_URL, "POST", params);
+            return null;
+        }
+
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            pDialog.dismiss();
+            //we will develop this method in version 2
+            // updateList();
         }
     }
 
